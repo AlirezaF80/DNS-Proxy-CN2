@@ -1,15 +1,26 @@
+import time
+
 class cache:
 
-    reqAddress = ""
-    reqList = []
+    def __init__(self):
+        self.cache = {}
 
-    def __init__(self, time_out, req):
-        self.time_out = time_out
-        self.req = req
+    def add_record(self, hostname, ip_address, ttl):
+        expiration_time = time.time() + ttl
+        self.cache[hostname] = (ip_address, expiration_time)
 
-    def check_req_in_list(self, reqList):
-        if self.reqAddress in reqList:
-            return self.reqAddress
-        else:
-            reqList.append(self.reqAddress)
-            return False
+    def get_record(self, hostname):
+        if hostname in self.cache:
+            ip_address, expiration_time = self.cache[hostname]
+            if expiration_time > time.time():
+                return ip_address
+            else:
+                del self.cache[hostname]
+        return None
+
+    def remove_record(self, hostname):
+        if hostname in self.cache:
+            del self.cache[hostname]
+
+    def clear_cache(self):
+        self.cache = {}
