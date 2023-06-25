@@ -8,9 +8,9 @@ class DNSHeader:
         self.additional_num = additional_num
 
     def __repr__(self):
-        return f'ID: {self.id}, Flags: {self.flags}, # Questions: {self.questions_num}' \
+        return f'DNSHeader(ID: {self.id}, Flags: {self.flags}, # Questions: {self.questions_num}' \
                f', # Answer RRs: {self.answers_num}, # Authority RRs: {self.auth_num}' \
-               f', # AdditionalRRs : {self.additional_num}'
+               f', # AdditionalRRs : {self.additional_num})'
 
 
 class DNSQuery:
@@ -19,11 +19,22 @@ class DNSQuery:
         self.type = type
         self.class_ = class_
 
+    def __bytes__(self):
+        name_parts = self.name.split('.')
+        name_bytes = b''
+        for part in name_parts:
+            name_bytes += bytes([len(part)])
+            name_bytes += part.encode('utf-8')
+        name_bytes += b'\x00'
+        type_bytes = self.type.to_bytes(2, 'big')
+        class_bytes = self.class_.to_bytes(2, 'big')
+        return name_bytes + type_bytes + class_bytes
+
     def __repr__(self):
-        return f'Name: {self.name}, Type: {self.type}, Class: {self.class_}'
+        return f'DNSQuery(Name: {self.name}, Type: {self.type}, Class: {self.class_})'
 
 
-class DNSRequest:
+class DNSMessage:
     def __init__(self, message):
         self.message = message
         self.header = self.parse_header()
@@ -70,9 +81,9 @@ class DNSRequest:
 
 
 if __name__ == '__main__':
-    dns_message = '00028180000100010000000006676f6f676c6503636f6d0000010001c00c00010001000000b50004d8ef2678'
-    dns_message = bytes.fromhex(dns_message)
-    dns_request = DNSRequest(dns_message)
+    dns_message_hex = '00028180000100010000000006676f6f676c6503636f6d0000010001c00c00010001000000b50004d8ef2678'
+    dns_message_hex = bytes.fromhex(dns_message_hex)
+    dns_message = DNSMessage(dns_message_hex)
 
-    print('Header:', dns_request.header)
-    print('Queries:', dns_request.queries)
+    print('Header:', dns_message.header)
+    print('Queries:', dns_message.queries)
