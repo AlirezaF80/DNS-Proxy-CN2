@@ -30,8 +30,37 @@ class DNSMessageQuery:
         class_bytes = self.query_class.to_bytes(2, 'big')
         return name_bytes + type_bytes + class_bytes
 
+    def __len__(self):
+        return len(self.__bytes__())
+
     def __repr__(self):
         return f'DNSQuery(Name: {self.query_name}, Type: {self.query_type}, Class: {self.query_class})'
+
+
+class DNSMessageResourceRecord:
+    def __init__(self, rr_name, rr_type, rr_class, rr_ttl, rdlength, rdata):
+        self.rr_name = rr_name
+        self.rr_type = rr_type
+        self.rr_class = rr_class
+        self.rr_ttl = rr_ttl
+        self.rdlength = rdlength
+        self.rdata = rdata
+
+    def __bytes__(self):
+        name_bytes = self.rr_name.to_bytes(2, 'big')
+        type_bytes = self.rr_type.to_bytes(2, 'big')
+        class_bytes = self.rr_class.to_bytes(2, 'big')
+        ttl_bytes = self.rr_ttl.to_bytes(2, 'big')
+        rdlen_bytes = self.rdlength.to_bytes(2, 'big')
+        rdata_bytes = self.rdata
+        return name_bytes + type_bytes + class_bytes + ttl_bytes + rdata_bytes + rdlen_bytes
+
+    def __len__(self):
+        return len(self.__bytes__())
+
+    def __repr__(self):
+        return f'DNSMessageResourceRecord(Name: {self.rr_name}, Type: {self.rr_type}, Class: {self.rr_class}' \
+               f', TTL: {self.rr_ttl}, RDLength: {self.rdlength}, RData: {self.rdata})'
 
 
 class DNSMessage:
@@ -49,9 +78,12 @@ class DNSMessageParser:
         message = message
         header = DNSMessageParser.parse_header(message)
         queries = DNSMessageParser.parse_queries(message, header.queries_num)
-        answers = []
-        authority = []
-        additional = []
+        answers_offset = 12 + sum(len(query) for query in queries)
+        answers = DNSMessageParser.parse_resource_records(message, answers_offset, header.answers_num)
+        authority_offset = answers_offset + sum(len(ans) for ans in answers)
+        authority = DNSMessageParser.parse_resource_records(message, authority_offset, header.auth_num)
+        additional_offset = authority_offset + sum(len(auth) for auth in authority)
+        additional = DNSMessageParser.parse_resource_records(message, additional_offset, header.additional_num)
         return DNSMessage(header, queries, answers, authority, additional)
 
     @staticmethod
@@ -95,11 +127,38 @@ class DNSMessageParser:
 
         return queries
 
+    @staticmethod
+    def parse_resource_records(message, offset, resource_records_num) -> list[DNSMessageResourceRecord]:
+        if resource_records_num == 0:
+            return []
+
+        cur_offset = offset
+
+        resource_records = []
+        for _ in range(resource_records_num):
+            rr_name = (message[offset] << 8) + message[offset + 1]
+            cur_offset += 2
+            rr_type = (message[cur_offset] << 8) + message[cur_offset + 1]
+            cur_offset += 2
+            rr_class = (message[cur_offset] << 8) + message[cur_offset + 1]
+            cur_offset += 2
+            rr_ttl = (message[cur_offset] << 24) + (message[cur_offset + 1] << 16) + (
+                    message[cur_offset + 2] << 8) + message[cur_offset + 3]
+            cur_offset += 4
+            rdlength = (message[cur_offset] << 8) + message[cur_offset + 1]
+            cur_offset += 2
+            rdata = message[cur_offset:cur_offset + rdlength]
+            cur_offset += rdlength
+            resource_record = DNSMessageResourceRecord(rr_name, rr_type, rr_class, rr_ttl, rdlength, rdata)
+            resource_records.append(resource_record)
+        return resource_records
+
 
 if __name__ == '__main__':
-    dns_message_hex = '00028180000100010000000006676f6f676c6503636f6d0000010001c00c00010001000000b50004d8ef2678'
+    dns_message_hex = '45fe818000010002000000000474696d65046e69737403676f760000010001c00c000500010000041b000b046e74703103676c62c011c02b00010001000000ed000484a36106'
     dns_message_hex = bytes.fromhex(dns_message_hex)
     dns_message = DNSMessageParser.parse(dns_message_hex)
 
     print('Header:', dns_message.header)
     print('Queries:', dns_message.queries)
+    print('Answers:', dns_message.answers)
