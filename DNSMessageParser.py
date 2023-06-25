@@ -74,7 +74,7 @@ class DNSMessageParser:
         cur_offset = 12
         queries = []
         for _ in range(queries_num):
-            qname_parts = []
+            query_name_parts = []
             while True:
                 length = message[cur_offset]
                 if length == 0:
@@ -82,9 +82,9 @@ class DNSMessageParser:
 
                 cur_offset += 1
                 query_part = message[cur_offset:cur_offset + length].decode('utf-8')
-                qname_parts.append(query_part)
+                query_name_parts.append(query_part)
                 cur_offset += length
-            query_name = '.'.join(qname_parts)
+            query_name = '.'.join(query_name_parts)
             cur_offset += 1
             query_type = (message[cur_offset] << 8) + message[cur_offset + 1]
             cur_offset += 2
