@@ -1,14 +1,14 @@
 class DNSMessageHeader:
-    def __init__(self, transaction_id, flags, questions_num, answers_num, auth_num, additional_num):
+    def __init__(self, transaction_id, flags, queries_num, answers_num, auth_num, additional_num):
         self.transaction_id = transaction_id
         self.flags = flags
-        self.questions_num = questions_num
+        self.queries_num = queries_num
         self.answers_num = answers_num
         self.auth_num = auth_num
         self.additional_num = additional_num
 
     def __repr__(self):
-        return f'DNSHeader(ID: {self.transaction_id}, Flags: {self.flags}, # Questions: {self.questions_num}' \
+        return f'DNSHeader(ID: {self.transaction_id}, Flags: {self.flags}, # Queries: {self.queries_num}' \
                f', # Answer RRs: {self.answers_num}, # Authority RRs: {self.auth_num}' \
                f', # AdditionalRRs : {self.additional_num})'
 
@@ -48,7 +48,7 @@ class DNSMessageParser:
     def parse(message):
         message = message
         header = DNSMessageParser.parse_header(message)
-        queries = DNSMessageParser.parse_questions(message, header.questions_num)
+        queries = DNSMessageParser.parse_queries(message, header.queries_num)
         answers = []
         authority = []
         additional = []
@@ -59,21 +59,21 @@ class DNSMessageParser:
         header_data = message[:12]
         transaction_id = (header_data[0] << 8) + header_data[1]
         flags = (header_data[2] << 8) + header_data[3]
-        questions_num = (header_data[4] << 8) + header_data[5]
+        queries_num = (header_data[4] << 8) + header_data[5]
         answers_num = (header_data[6] << 8) + header_data[7]
         auth_num = (header_data[8] << 8) + header_data[9]
         additional_num = (header_data[10] << 8) + header_data[11]
 
-        return DNSMessageHeader(transaction_id, flags, questions_num, answers_num, auth_num, additional_num)
+        return DNSMessageHeader(transaction_id, flags, queries_num, answers_num, auth_num, additional_num)
 
     @staticmethod
-    def parse_questions(message, question_num) -> list[DNSMessageQuery]:
-        if question_num == 0:
+    def parse_queries(message, queries_num) -> list[DNSMessageQuery]:
+        if queries_num == 0:
             return []
 
         cur_offset = 12
         queries = []
-        for _ in range(question_num):
+        for _ in range(queries_num):
             qname_parts = []
             while True:
                 length = message[cur_offset]
