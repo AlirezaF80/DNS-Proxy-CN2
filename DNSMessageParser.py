@@ -1,6 +1,6 @@
-class DNSHeader:
-    def __init__(self, id, flags, questions_num, answers_num, auth_num, additional_num):
-        self.id = id
+class DNSMessageHeader:
+    def __init__(self, transaction_id, flags, questions_num, answers_num, auth_num, additional_num):
+        self.transaction_id = transaction_id
         self.flags = flags
         self.questions_num = questions_num
         self.answers_num = answers_num
@@ -8,30 +8,30 @@ class DNSHeader:
         self.additional_num = additional_num
 
     def __repr__(self):
-        return f'DNSHeader(ID: {self.id}, Flags: {self.flags}, # Questions: {self.questions_num}' \
+        return f'DNSHeader(ID: {self.transaction_id}, Flags: {self.flags}, # Questions: {self.questions_num}' \
                f', # Answer RRs: {self.answers_num}, # Authority RRs: {self.auth_num}' \
                f', # AdditionalRRs : {self.additional_num})'
 
 
-class DNSQuery:
-    def __init__(self, name, type, class_):
-        self.name = name
-        self.type = type
-        self.class_ = class_
+class DNSMessageQuery:
+    def __init__(self, query_name, query_type, query_class):
+        self.query_name = query_name
+        self.query_type = query_type
+        self.query_class = query_class
 
     def __bytes__(self):
-        name_parts = self.name.split('.')
+        name_parts = self.query_name.split('.')
         name_bytes = b''
         for part in name_parts:
             name_bytes += bytes([len(part)])
             name_bytes += part.encode('utf-8')
         name_bytes += b'\x00'
-        type_bytes = self.type.to_bytes(2, 'big')
-        class_bytes = self.class_.to_bytes(2, 'big')
+        type_bytes = self.query_type.to_bytes(2, 'big')
+        class_bytes = self.query_class.to_bytes(2, 'big')
         return name_bytes + type_bytes + class_bytes
 
     def __repr__(self):
-        return f'DNSQuery(Name: {self.name}, Type: {self.type}, Class: {self.class_})'
+        return f'DNSQuery(Name: {self.query_name}, Type: {self.query_type}, Class: {self.query_class})'
 
 
 class DNSMessage:
@@ -42,14 +42,14 @@ class DNSMessage:
 
     def parse_header(self):
         header_data = self.message[:12]
-        id = (header_data[0] << 8) + header_data[1]
+        transaction_id = (header_data[0] << 8) + header_data[1]
         flags = (header_data[2] << 8) + header_data[3]
         questions_num = (header_data[4] << 8) + header_data[5]
         answers_num = (header_data[6] << 8) + header_data[7]
         auth_num = (header_data[8] << 8) + header_data[9]
         additional_num = (header_data[10] << 8) + header_data[11]
 
-        return DNSHeader(id, flags, questions_num, answers_num, auth_num, additional_num)
+        return DNSMessageHeader(transaction_id, flags, questions_num, answers_num, auth_num, additional_num)
 
     def parse_questions(self):
         if self.header.questions_num == 0:
@@ -73,7 +73,7 @@ class DNSMessage:
             query_type = (self.message[cur_offset] << 8) + self.message[cur_offset + 1]
             cur_offset += 2
             query_class = (self.message[cur_offset] << 8) + self.message[cur_offset + 1]
-            dns_query = DNSQuery(query_name, query_type, query_class)
+            dns_query = DNSMessageQuery(query_name, query_type, query_class)
             queries.append(dns_query)
             cur_offset += 2
 
