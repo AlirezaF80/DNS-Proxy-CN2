@@ -1,16 +1,18 @@
 import socket
 
+from Cache import Cache
 from DNSMessageParser import *
 
 
 class DNSProxyServer:
     DNS_SERVER_PORT = 53
 
-    def __init__(self, dns_server_ip, host_address, listen_port):
+    def __init__(self, dns_server_ip, host_address, listen_port, cache: Cache):
         self.dns_server_ip = dns_server_ip
         self.host_address = host_address
         self.listen_port = listen_port
         self.request_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.cache: Cache = cache
 
     def start(self):
         try:
@@ -28,11 +30,22 @@ class DNSProxyServer:
 
     def _handle_request(self, dns_query: DNSMessage, requester_address):
         try:
-            dns_response = self._send_query(dns_query)
-            print("Response from", requester_address, "processed")
+            if self.cache.is_record_cached(dns_query):
+                print("Record for", dns_query.queries[0].query_name, "found in cache")
+                cached_answer = self.cache.get_record(dns_query)
+                cached_answer.header.transaction_id = dns_query.header.transaction_id
+                dns_response = cached_answer
+            else:
+                dns_response = self._send_query(dns_query)
+                print("Record for", dns_query.queries[0].query_name, "added to cache")
+                self.cache.add_record(dns_query, dns_response)
+            print(f"Request ({dns_query.queries[0].query_name}) from {requester_address} processed")
+            print(dns_response)
             self.request_socket.sendto(bytes(dns_response), requester_address)
         except Exception as e:
             print("Error processing DNS request:", e)
+        finally:
+            print("\n")
 
     def _send_query(self, dns_query: DNSMessage):
         query_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

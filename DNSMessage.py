@@ -80,11 +80,11 @@ class DNSMessageResourceRecord:
 
 class DNSMessage:
     def __init__(self, header, queries, answers, authority, additional):
-        self.header = header
-        self.queries = queries
-        self.answers = answers
-        self.authority = authority
-        self.additional = additional
+        self.header: DNSMessageHeader = header
+        self.queries: list[DNSMessageQuery] = queries
+        self.answers: list[DNSMessageResourceRecord] = answers
+        self.authority: list[DNSMessageResourceRecord] = authority
+        self.additional: list[DNSMessageResourceRecord] = additional
 
     def __bytes__(self):
         header_bytes = bytes(self.header)
