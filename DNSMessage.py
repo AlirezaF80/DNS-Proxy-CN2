@@ -45,6 +45,9 @@ class DNSMessageQuery:
     def __len__(self):
         return len(self.__bytes__())
 
+    def __eq__(self, other):
+        return self.query_name == other.query_name and self.query_type == other.query_type and self.query_class == other.query_class
+
     def __repr__(self):
         return f'DNSQuery(Name: {self.query_name}, Type: {self.query_type}, Class: {self.query_class})'
 
