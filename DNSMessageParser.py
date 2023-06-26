@@ -80,13 +80,3 @@ class DNSMessageParser:
             resource_record = DNSMessageResourceRecord(rr_name, rr_type, rr_class, rr_ttl, rdlength, rdata)
             resource_records.append(resource_record)
         return resource_records
-
-
-if __name__ == '__main__':
-    dns_message_hex = '45fe818000010002000000000474696d65046e69737403676f760000010001c00c000500010000041b000b046e74703103676c62c011c02b00010001000000ed000484a36106'
-    dns_message_hex = bytes.fromhex(dns_message_hex)
-    dns_message = DNSMessageParser.parse(dns_message_hex)
-
-    print('Header:', dns_message.header)
-    print('Queries:', dns_message.queries)
-    print('Answers:', dns_message.answers)
