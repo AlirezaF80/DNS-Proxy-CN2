@@ -3,7 +3,7 @@ from DNSMessage import DNSMessageHeader, DNSMessageQuery, DNSMessageResourceReco
 
 class DNSMessageParser:
     @staticmethod
-    def parse(message):
+    def parse(message) -> DNSMessage:
         header = DNSMessageParser.parse_header(message)
         queries = DNSMessageParser.parse_queries(message, header.queries_num)
         answers_offset = 12 + sum(len(query) for query in queries)
