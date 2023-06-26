@@ -23,6 +23,9 @@ class Cache:
     def clear_cache(self):
         self.redis.flushdb()
 
+    def is_record_cached(self, hostname):
+        return self.redis.exists(hostname) == 1
+
 
 # Example usage
 cache = Cache(ttl=3600)  # TTL of 1 hour
@@ -30,12 +33,10 @@ cache = Cache(ttl=3600)  # TTL of 1 hour
 # Add a record to the cache
 cache.add_record('example.com', '192.168.1.100')
 
-# Get a record from the cache
-ip = cache.get_record('example.com')
-print(ip)  # Output: 192.168.1.100
+# Check if a record is already cached
+is_cached = cache.is_record_cached('example.com')
+print(is_cached)  # Output: True
 
-# Remove a record from the cache
-cache.remove_record('example.com')
-
-# Clear the entire cache
-cache.clear_cache()
+# Check if a non-existing record is cached
+is_cached = cache.is_record_cached('example.org')
+print(is_cached)  # Output: False
