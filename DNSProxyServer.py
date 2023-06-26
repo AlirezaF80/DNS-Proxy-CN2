@@ -4,8 +4,8 @@ from DNSMessageParser import *
 
 
 class DNSProxyServer:
-    def __init__(self, DNSserverIP, host_address, port):
-        self.DNSserverIP = DNSserverIP
+    def __init__(self, dns_server_ip, host_address, port):
+        self.dns_server_ip = dns_server_ip
         self.host_address = host_address
         self.port = port
         self.request_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -33,7 +33,7 @@ class DNSProxyServer:
             print("Error processing DNS request:", e)
 
     def _send_query(self, dns_query):
-        server = (self.DNSserverIP, 53)
+        server = (self.dns_server_ip, 53)
         query_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         query_socket.sendto(bytes(dns_query), server)
         dns_answer, _ = query_socket.recvfrom(1024)
