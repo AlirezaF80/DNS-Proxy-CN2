@@ -30,7 +30,7 @@ class Cache:
         self.redis.flushdb()
 
     def is_record_cached(self, hostname):
-        return self.redis.exists(hostname)
+        return self.redis.exists(hostname) == 1
 
 
 # Example usage
