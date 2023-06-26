@@ -1,7 +1,4 @@
-import time
 import redis
-import json
-import logging
 
 
 class Cache:
