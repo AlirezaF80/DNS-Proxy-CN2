@@ -1,4 +1,6 @@
 import socket
+from threading import Thread
+
 from Cache import Cache
 from DNSMessage import DNSMessage
 from DNSMessageParser import DNSMessageParser
@@ -31,7 +33,8 @@ class DNSProxyServer:
         while True:
             data, requester_addr = self.request_socket.recvfrom(1024)
             dns_query = DNSMessageParser.parse(data)
-            self._handle_request(dns_query, requester_addr)
+            thread = Thread(target=self._handle_request, args=(dns_query, requester_addr))
+            thread.start()
 
     def _handle_request(self, dns_query: DNSMessage, requester_address):
         try:
