@@ -1,10 +1,18 @@
 import time
 import redis
+import json
+
 
 class Cache:
-    def __init__(self, ttl):
+    def __init__(self, settings_file):
         self.redis = redis.Redis(host='localhost', port=6379, db=0)
-        self.ttl = ttl
+        self.load_settings(settings_file)
+
+    def load_settings(self, settings_file):
+        with open(settings_file, 'r') as file:
+            settings = json.load(file)
+        self.ttl = settings.get('cache-expiration-time', 3600)
+        self.external_dns_servers = settings.get('external-dns-servers', [])
 
     def add_record(self, hostname, ip_address):
         self.redis.set(hostname, ip_address, ex=self.ttl)
@@ -24,8 +32,9 @@ class Cache:
     def is_record_cached(self, hostname):
         return self.redis.exists(hostname)
 
+
 # Example usage
-cache = Cache(ttl=5)  # TTL of 5 seconds
+cache = Cache("setting.json")  # TTL of 5 seconds
 
 # Add a record to the cache
 cache.add_record('example.com', '192.168.1.100')
@@ -48,3 +57,11 @@ print(is_cached)  # Output: False
 # Retrieve the record after the TTL has expired
 ip = cache.get_record('example.com')
 print(ip)  # Output: None
+
+
+# Example usage with settings.json file
+cache = Cache('setting.json')
+
+# Accessing the loaded settings
+print(cache.ttl)  # Output: Cache expiration time (in seconds)
+print(cache.external_dns_servers)  # Output: List of external DNS servers
