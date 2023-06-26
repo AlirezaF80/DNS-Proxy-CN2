@@ -62,10 +62,10 @@ class DNSMessageResourceRecord:
         name_bytes = self.rr_name.to_bytes(2, 'big')
         type_bytes = self.rr_type.to_bytes(2, 'big')
         class_bytes = self.rr_class.to_bytes(2, 'big')
-        ttl_bytes = self.rr_ttl.to_bytes(2, 'big')
+        ttl_bytes = self.rr_ttl.to_bytes(4, 'big')
         rdlen_bytes = self.rdlength.to_bytes(2, 'big')
         rdata_bytes = self.rdata
-        return name_bytes + type_bytes + class_bytes + ttl_bytes + rdata_bytes + rdlen_bytes
+        return name_bytes + type_bytes + class_bytes + ttl_bytes + rdlen_bytes + rdata_bytes
 
     def __len__(self):
         return len(self.__bytes__())

@@ -4,7 +4,6 @@ from DNSMessage import DNSMessageHeader, DNSMessageQuery, DNSMessageResourceReco
 class DNSMessageParser:
     @staticmethod
     def parse(message):
-        message = message
         header = DNSMessageParser.parse_header(message)
         queries = DNSMessageParser.parse_queries(message, header.queries_num)
         answers_offset = 12 + sum(len(query) for query in queries)
@@ -65,7 +64,7 @@ class DNSMessageParser:
 
         resource_records = []
         for _ in range(resource_records_num):
-            rr_name = (message[offset] << 8) + message[offset + 1]
+            rr_name = (message[cur_offset] << 8) + message[cur_offset + 1]
             cur_offset += 2
             rr_type = (message[cur_offset] << 8) + message[cur_offset + 1]
             cur_offset += 2
