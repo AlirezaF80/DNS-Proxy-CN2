@@ -29,16 +29,15 @@ class Cache:
     def _get_key(dns_query: DNSMessage):
         if dns_query is None:
             raise ValueError("DNS query must not be None")
-        if dns_query.header.queries_num != 1:
-            raise ValueError("DNS query must have exactly one query")
-        return dns_query.queries[0].query_name
+        key = b''
+        for q in dns_query.queries:
+            key += bytes(q)
+        return key
 
     @staticmethod
     def _get_value(dns_response: DNSMessage):
         if dns_response is None:
             raise ValueError("DNS response must not be None")
-        if dns_response.header.answers_num != 1:
-            raise ValueError("DNS response must have exactly one answer")
         return bytes(dns_response)
 
     def remove_record(self, dns_query: DNSMessage):
