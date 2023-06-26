@@ -1,5 +1,0 @@
-{
-    "cache-expiration-time": 3600,
-    "external-dns-servers": ["8.8.8.8", "8.8.4.4"]
-  }
-  

@@ -12,6 +12,6 @@ class ServerConfigLoader:
 
 
 if __name__ == '__main__':
-    json_reader = ServerConfigLoader('setting.json')  # Replace 'data.json' with your JSON file path
+    json_reader = ServerConfigLoader('ServerConfig.json')  # Replace 'data.json' with your JSON file path
     json_data = json_reader.read_json()
     print(json_data)

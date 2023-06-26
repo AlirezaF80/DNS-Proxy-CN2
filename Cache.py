@@ -47,37 +47,3 @@ class Cache:
 
     def is_record_cached(self, hostname):
         return self.redis.exists(hostname) == 1
-
-
-if __name__ == '__main__':
-    # Example usage
-    cache = Cache("setting.json")  # TTL of 5 seconds
-
-    # Add a record to the cache
-    cache.add_record('example.com', '192.168.1.100')
-
-    # Check if the record is cached immediately after adding
-    is_cached = cache.is_record_cached('example.com')
-    print(is_cached)  # Output: True
-
-    # Retrieve the record immediately after adding
-    ip = cache.get_record('example.com')
-    print(ip)  # Output: 192.168.1.100
-
-    # Wait for the TTL to expire
-    time.sleep(6)
-
-    # Check if the record is still cached after the TTL has expired
-    is_cached = cache.is_record_cached('example.com')
-    print(is_cached)  # Output: False
-
-    # Retrieve the record after the TTL has expired
-    ip = cache.get_record('example.com')
-    print(ip)  # Output: None
-
-    # Example usage with settings.json file
-    cache = Cache('setting.json')
-
-    # Accessing the loaded settings
-    print(cache.ttl)  # Output: Cache expiration time (in seconds)
-    print(cache.external_dns_servers)  # Output: List of external DNS servers
