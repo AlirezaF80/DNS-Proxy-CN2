@@ -7,6 +7,18 @@ class DNSMessageHeader:
         self.auth_num = auth_num
         self.additional_num = additional_num
 
+    def __bytes__(self):
+        transaction_id_bytes = self.transaction_id.to_bytes(2, 'big')
+        flags_bytes = self.flags.to_bytes(2, 'big')
+        queries_num_bytes = self.queries_num.to_bytes(2, 'big')
+        answers_num_bytes = self.answers_num.to_bytes(2, 'big')
+        auth_num_bytes = self.auth_num.to_bytes(2, 'big')
+        additional_num_bytes = self.additional_num.to_bytes(2, 'big')
+        return transaction_id_bytes + flags_bytes + queries_num_bytes + answers_num_bytes + auth_num_bytes + additional_num_bytes
+
+    def __len__(self):
+        return len(self.__bytes__())
+
     def __repr__(self):
         return f'DNSHeader(ID: {self.transaction_id}, Flags: {self.flags}, # Queries: {self.queries_num}' \
                f', # Answer RRs: {self.answers_num}, # Authority RRs: {self.auth_num}' \
@@ -70,3 +82,26 @@ class DNSMessage:
         self.answers = answers
         self.authority = authority
         self.additional = additional
+
+    def __bytes__(self):
+        header_bytes = bytes(self.header)
+        queries_bytes = b''
+        for query in self.queries:
+            queries_bytes += bytes(query)
+        answers_bytes = b''
+        for answer in self.answers:
+            answers_bytes += bytes(answer)
+        authority_bytes = b''
+        for auth in self.authority:
+            authority_bytes += bytes(auth)
+        additional_bytes = b''
+        for add in self.additional:
+            additional_bytes += bytes(add)
+        return header_bytes + queries_bytes + answers_bytes + authority_bytes + additional_bytes
+
+    def __len__(self):
+        return len(self.__bytes__())
+
+    def __repr__(self):
+        return f'DNSMessage(Header: {self.header}, Queries: {self.queries}, Answers: {self.answers}' \
+               f', Authority: {self.authority}, Additional: {self.additional})'
