@@ -1,8 +1,12 @@
 {
-  "cache-expiration-time": 3600,
+  "cache-expiration-time": 20,
   "external-dns-servers": [
     "8.8.8.8",
     "8.8.4.4"
-  ]
+  ],
+  "host-address": "127.0.0.1",
+  "host-port": 53,
+  "redis-host": "127.0.0.1",
+  "redis-port": 6379
 }
   
