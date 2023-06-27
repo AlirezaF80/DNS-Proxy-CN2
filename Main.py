@@ -1,6 +1,6 @@
 from Cache import Cache
 from DNSProxyServer import DNSProxyServer
-from ServerConfigLoader import ServerConfigLoader, ServerConfig
+from ServerConfigLoader import ServerConfigLoader
 
 if __name__ == '__main__':
     server_config = ServerConfigLoader('ServerConfig.json').load()
