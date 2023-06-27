@@ -6,16 +6,28 @@ This is a DNS Proxy server written in Python for the Computer Networks 2 course 
 - Acts as a DNS Proxy server, handling DNS requests and forwarding them to external DNS servers if not cached.
 - Implements a cache using Redis to store and retrieve DNS responses.
 
+
+## Prerequisites
+
+- Python 3.x
+- Redis
+
+## Installation
+
+1. Install Python packages by running the following command:
+
+`pip install -r requirements.txt`
+
+2. Install and run Redis following the instructions provided by Redis at: [Getting Started with Redis](https://redis.io/docs/getting-started/)
+
 ## Usage
 
-1. Install the required Python packages by running the following command: `pip install -r requirements.txt`
+1. Modify the `ServerConfig.json` file to specify the desired server configuration.
 
-3. Modify the `ServerConfig.json` file to specify the desired server configuration.
-
-4. Run the `Main.py` script to start the DNS proxy server:
+2. Run the `Main.py` script to start the DNS proxy server:
 `python Main.py`
 
-5. The server will start listening for DNS requests on the specified host address and port. Clients can send DNS requests to the server, which will either serve the response from the cache or forward the request to the external DNS servers and cache the response.
+3. The server will start listening for DNS requests on the specified host address and port. Clients can send DNS requests to the server, which will either serve the response from the cache or forward the request to the external DNS servers and cache the response.
 
 ## Contributors
 
