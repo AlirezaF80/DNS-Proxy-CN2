@@ -5,7 +5,7 @@ This is a DNS Proxy server written in Python for the Computer Networks 2 course 
 
 - Acts as a DNS Proxy server, handling DNS requests and forwarding them to external DNS servers if not cached.
 - Implements a cache using Redis to store and retrieve DNS responses.
-
+- A benchmark is also included, to measure the traffic and time saved by using the Proxy Server.
 
 ## Prerequisites
 
