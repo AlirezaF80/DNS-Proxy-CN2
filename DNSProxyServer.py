@@ -5,12 +5,14 @@ from Cache import Cache
 from DNSMessage import DNSMessage
 from DNSMessageParser import DNSMessageParser
 
+DNS_SERVER_PORT = 53
+
 
 class DNSProxyServer:
-    DNS_SERVER_PORT = 53
+    DNS_SERVER_TIMEOUT = 5
 
-    def __init__(self, dns_server_ip: list, host_address, listen_port, cache: Cache):
-        self.dns_server_ip = dns_server_ip
+    def __init__(self, dns_server_ips: list, host_address, listen_port, cache: Cache):
+        self.dns_server_ips = dns_server_ips
         self.host_address = host_address
         self.listen_port = listen_port
         self.cache: Cache = cache
@@ -50,20 +52,27 @@ class DNSProxyServer:
         if self.cache.is_record_cached(dns_query):
             dns_response = self._answer_query_from_cache(dns_query)
             print(f"a DNS Request answered using cached response.")
+            return dns_response
         else:
-            dns_response = self._answer_query_from_dns(dns_query)
-            self.cache.add_record(dns_query, dns_response)
-            print(f"a DNS Request answered by requesting from DNS Server.")
-        return dns_response
+            for dns_ip in self.dns_server_ips:
+                try:
+                    dns_response = self._answer_query_from_dns(dns_query, dns_ip, DNS_SERVER_PORT)
+                    self.cache.add_record(dns_query, dns_response)
+                    print(f"a DNS Request answered by requesting from {dns_ip}.")
+                    return dns_response
+                except Exception as e:
+                    print(f"a DNS Request forwarded to {dns_ip} failed: {e}")
 
     def _answer_query_from_cache(self, dns_query: DNSMessage):
         cached_response = self.cache.get_record(dns_query)
         cached_response.header.transaction_id = dns_query.header.transaction_id
         return cached_response
 
-    def _answer_query_from_dns(self, dns_query: DNSMessage):
+    @staticmethod
+    def _answer_query_from_dns(dns_query: DNSMessage, dns_server_ip, dns_server_port):
         query_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        query_socket.sendto(bytes(dns_query), (self.dns_server_ip, self.DNS_SERVER_PORT))
+        query_socket.settimeout(DNSProxyServer.DNS_SERVER_TIMEOUT)
+        query_socket.sendto(bytes(dns_query), (dns_server_ip, dns_server_port))
         dns_answer, _ = query_socket.recvfrom(1024)
         query_socket.close()
         return DNSMessageParser.parse(dns_answer)

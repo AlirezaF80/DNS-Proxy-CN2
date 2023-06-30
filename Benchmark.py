@@ -25,7 +25,7 @@ def benchmark_dns_resolution(dns_proxy: DNSProxyServer, domain_list, num_request
             query_sizes[idx] = len(bytes(dns_query))
 
             start = time.time()
-            dns_server_answer = dns_proxy._answer_query_from_dns(dns_query)
+            dns_server_answer = dns_proxy._answer_query_from_dns(dns_query, '8.8.8.8', 53)
             dns_server_time = time.time() - start
             dns_server_times[idx] = dns_server_time
             dns_server_sizes[idx] = len(bytes(dns_server_answer))
@@ -69,13 +69,13 @@ def benchmark_dns_resolution(dns_proxy: DNSProxyServer, domain_list, num_request
 
 
 if __name__ == '__main__':
-    dns_server_ip = '8.8.8.8'
+    dns_server_ips = ['8.8.8.8']
     proxy_host_address = '127.0.0.1'
     proxy_host_port = 53
     domain_list = open('domain_list.txt').read().splitlines()
     num_requests = 3
 
     cache = Cache(30, 'localhost', 6379)
-    dns_proxy = DNSProxyServer(dns_server_ip, proxy_host_address, proxy_host_port, cache)
+    dns_proxy = DNSProxyServer(dns_server_ips, proxy_host_address, proxy_host_port, cache)
 
     benchmark_dns_resolution(dns_proxy, domain_list, num_requests)
