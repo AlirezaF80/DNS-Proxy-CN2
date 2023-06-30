@@ -68,13 +68,14 @@ def benchmark_dns_resolution(dns_proxy: DNSProxyServer, domain_list, num_request
     plt.show()
 
 
-dns_server_ip = '8.8.8.8'
-proxy_host_address = '127.0.0.1'
-proxy_host_port = 53
-domain_list = open('domain_list.txt').read().splitlines()
-num_requests = 3
+if __name__ == '__main__':
+    dns_server_ip = '8.8.8.8'
+    proxy_host_address = '127.0.0.1'
+    proxy_host_port = 53
+    domain_list = open('domain_list.txt').read().splitlines()
+    num_requests = 3
 
-cache = Cache(30, 'localhost', 6379)
-dns_proxy = DNSProxyServer(dns_server_ip, proxy_host_address, proxy_host_port, cache)
+    cache = Cache(30, 'localhost', 6379)
+    dns_proxy = DNSProxyServer(dns_server_ip, proxy_host_address, proxy_host_port, cache)
 
-benchmark_dns_resolution(dns_proxy, domain_list, num_requests)
+    benchmark_dns_resolution(dns_proxy, domain_list, num_requests)
