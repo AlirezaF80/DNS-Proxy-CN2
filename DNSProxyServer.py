@@ -9,12 +9,12 @@ from DNSMessageParser import DNSMessageParser
 class DNSProxyServer:
     DNS_SERVER_PORT = 53
 
-    def __init__(self, dns_server_ip, host_address, listen_port, cache: Cache):
+    def __init__(self, dns_server_ip: list, host_address, listen_port, cache: Cache):
         self.dns_server_ip = dns_server_ip
         self.host_address = host_address
         self.listen_port = listen_port
-        self.request_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.cache: Cache = cache
+        self.request_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def start(self):
         try:
@@ -43,6 +43,9 @@ class DNSProxyServer:
         except Exception as e:
             print("Error processing DNS request:", e)
 
+    def _send_response_to_requester(self, dns_response: DNSMessage, requester_address):
+        self.request_socket.sendto(bytes(dns_response), requester_address)
+
     def _answer_query(self, dns_query):
         if self.cache.is_record_cached(dns_query):
             dns_response = self._answer_query_from_cache(dns_query)
@@ -64,6 +67,3 @@ class DNSProxyServer:
         dns_answer, _ = query_socket.recvfrom(1024)
         query_socket.close()
         return DNSMessageParser.parse(dns_answer)
-
-    def _send_response_to_requester(self, dns_response: DNSMessage, requester_address):
-        self.request_socket.sendto(bytes(dns_response), requester_address)
